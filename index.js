@@ -1,12 +1,12 @@
-const express = reuiqre('express');
+const express = require('express');
 const app = express();
-const mongoose = reuqire('mongoose');
+const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
 const port = 8080;
 
-const item = require('./routes/item');
+const item = require('./app/routes/item');
 let config = require('config');
 
 let options = {
