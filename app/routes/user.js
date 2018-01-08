@@ -1,11 +1,9 @@
 const mongoose = require('mongoose');
-const Item = require('../models/item');
+const User = require('../models/user');
 
 function signup(req, res, next) {
 	if (req.body.password !== req.body.passwordConf) {
-		var err = new Error('Passwords do not match.');
-		err.status = 400;
-		res.send("passwords dont match");
+		res.status(400).send("UNACCEPTABLE: Passwords dont match!");
 		return next(err);
 	}
 
@@ -29,6 +27,8 @@ function signup(req, res, next) {
 				return res.status(200).send("Signed up!");
 			}
 		});
+	} else {
+		return res.status(400).send("UNACCEPTABLE: All fields must be complete!");
 	}
 }
 
@@ -72,6 +72,8 @@ function getProfile(req, res, next) {
 function logout(req, res, next) {
 	if (req.session) {
 		// delete session object
+		const db = mongoose.connection;
+		db.collection('sessions').remove({});
 		req.session.destroy(function (err) {
 			if (err) {
 				return next(err);
@@ -82,20 +84,9 @@ function logout(req, res, next) {
 	}
 }
 
-function updateItem(req, res) {
-	Item.findById({ _id: req.params.id }, (err, item) => {
-		if (err) res.send(err);
-		Object.assign(item, req.body).save((err, item) => {
-			if (err) res.send(err);
-			res.json({ message: "Item updated!", item });
-		})
-	})
-}
-
 module.exports = {
-	getItems,
-	getItem,
-	postItem,
-	deleteItem,
-	updateItem
+	signup,
+	signin,
+	getProfile,
+	logout
 }
