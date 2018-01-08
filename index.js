@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 var session = require('express-session');
+const cors = require('cors');
 var MongoStore = require('connect-mongodb-session')(session);
+
 
 const port = 8080;
 
@@ -27,6 +29,14 @@ db.on('error', console.error.bind(console, 'connection error:'));
 if (config.util.getEnv('NODE_ENV') !== 'test') {
 	app.use(morgan('combined'));
 }
+
+app.use(cors({
+	origin: (origin, cb) => {
+		return cb(null, true) // always allow, compare http://stackoverflow.com/questions/29531521/req-headers-origin-is-undefined
+	},
+	// credentials: true,
+	// allowedHeaders: [ 'Content-Type', 'Authorization' ]
+}))
 
 app.use(session({
 	secret: 'work hard, party harder',
