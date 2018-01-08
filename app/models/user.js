@@ -57,4 +57,5 @@ UserSchema.pre('save', function (next) {
 	})
 });
 
-module.exports = mongoose.model('user', UserSchema);
+const User = mongoose.model('user', UserSchema);
+module.exports = User;

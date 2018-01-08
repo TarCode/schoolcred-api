@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
+var MongoStore = require('connect-mongodb-session')(session);
 
 const port = 8080;
 
@@ -31,9 +31,14 @@ if (config.util.getEnv('NODE_ENV') !== 'test') {
 app.use(session({
 	secret: 'work hard, party harder',
 	resave: true,
-	saveUninitialized: false,
+	saveUninitialized: true,
+	cookie: {
+		path: '/',
+		httpOnly: false,
+		maxAge: 24 * 60 * 60 * 1000
+	},
 	store: new MongoStore({
-		mongooseConnection: db
+		url: config.DBHost
 	})
 }));
 app.use(bodyParser.json());

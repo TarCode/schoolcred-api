@@ -10,6 +10,9 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
+var agent = chai.request.agent(server)
+
+
 describe('User', () => {
 
 	before(done => {
@@ -18,7 +21,7 @@ describe('User', () => {
 		})
 	})
 
-	describe('/POST user', () => {
+	describe('user', () => {
 		it('Should signup a user', done => {
 
 			var userData = {
@@ -28,8 +31,9 @@ describe('User', () => {
 				passwordConf: "test",
 			}
 
-			chai.request(server)
+			agent
 					.post('/signup')
+					.withCredentials()
 					.send(userData)
 					.end((err, res) => {
 						res.should.have.status(200);
@@ -38,11 +42,38 @@ describe('User', () => {
 						done();
 					})
 		})
-	})
 
-	describe('/GET logout', () => {
+		it('Should sign a user in', done => {
+
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
+			agent
+				.post('/signin')
+				.withCredentials()
+				.send(user)
+				.end((err, res) => {
+					console.log("ERROR:",err);
+					res.should.have.status(200);
+					res.text.should.be.a('string');
+					res.text.should.equal('Signed in!');
+					done();
+				})
+		})
+
+		it('Should get user profile', done => {
+			agent
+				.get('/profile')
+				.end((err, res) => {
+					res.should.have.status(200);
+					done();
+				})
+		})
+
 		it('Should log a user out', done => {
-			chai.request(server)
+			agent
 				.get('/logout')
 				.end((err, res) => {
 					res.should.have.status(200);
@@ -52,6 +83,8 @@ describe('User', () => {
 				})
 		})
 	})
+
+
 
 	after(done => {
 		User.remove({}, err => {

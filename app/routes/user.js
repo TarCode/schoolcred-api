@@ -24,6 +24,8 @@ function signup(req, res, next) {
 				return next(error);
 			} else {
 				req.session.userId = user._id;
+				
+				console.log("REQ SESSION ON SIGNUP", req.session);
 				return res.status(200).send("Signed up!");
 			}
 		});
@@ -40,7 +42,7 @@ function signin(req, res, next) {
 				err.status = 401;
 				return next(err);
 			} else {
-				req.session.userId = user._id;
+				req.session.cookie.userId = user._id;
 				return res.status(200).send("Signed in!")
 			}
 		});
@@ -73,7 +75,7 @@ function logout(req, res, next) {
 	if (req.session) {
 		// delete session object
 		const db = mongoose.connection;
-		db.collection('sessions').remove({});
+		console.log("REQ SESSION", req.session);
 		req.session.destroy(function (err) {
 			if (err) {
 				return next(err);
