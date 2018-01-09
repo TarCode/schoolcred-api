@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+let config = require('config');
+
 const User = require('../models/user');
 
 function signup(req, res, next) {
 	if (req.body.password !== req.body.passwordConf) {
-		res.status(400).send("UNACCEPTABLE: Passwords dont match!");
-		return next(err);
+		return res.json({ success: false, message: 'Authentication failed. Passwords must match.' });
 	}
 
 	if (req.body.email &&
@@ -21,39 +23,62 @@ function signup(req, res, next) {
 
 		User.create(userData, function (error, user) {
 			if (error) {
-				return next(error);
+				throw error;
 			} else {
-				req.session.userId = user._id;
-				return res.status(200).send("Signed up!");
+				const payload = {
+					userId: user._id
+				};
+				var token = jwt.sign(payload, config.secret, {
+					expiresIn: 144000 // expires in 24 hours
+				});
+
+				// return the information including token as JSON
+				return res.status(200).json({
+					success: true,
+					message: 'Enjoy your token!',
+					token: token,
+					userId: user._id
+				});
 			}
 		});
 	} else {
-		return res.status(400).send("UNACCEPTABLE: All fields must be complete!");
+		return res.json({ success: false, message: 'Authentication failed. All fields ust be completed' });
 	}
 }
 
 function signin(req, res, next) {
 	if (req.body.email && req.body.password) {
-		User.authenticate(req.body.email, req.body.password, function (error, user) {
-			if (error || !user) {
-				var err = new Error('Wrong email or password.');
-				err.status = 401;
-				return next(err);
-			} else {
-				req.session.cookie.userId = user._id;
-				return res.status(200).send("Signed in!")
+		User.authenticate(req.body.email, req.body.password, function (err, user) {
+			if (err) throw err;
+
+			if (!user) {
+				return res.json({ success: false, message: 'Authentication failed. User not found.' });
+			} else if (user) {
+
+				const payload = {
+					userId: user._id
+				};
+				var token = jwt.sign(payload, config.secret, {
+					expiresIn: 144000 // expires in 24 hours
+				});
+
+				// return the information including token as JSON
+				return res.status(200).json({
+					success: true,
+					message: 'Enjoy your token!',
+					token: token,
+					userId: user._id
+				});
 			}
 		});
 	} else {
-		var err = new Error('All fields required.');
-		err.status = 400;
-		return next(err);
+		return res.json({ success: false, message: 'Authentication failed. All fields must be completed.' });
 	}
 }
 
 
 function getProfile(req, res, next) {
-	User.findById(req.session.userId)
+	User.findById(req.query.userId)
 		.exec(function (error, user) {
 			if (error) {
 				return next(error);
@@ -63,24 +88,21 @@ function getProfile(req, res, next) {
 					err.status = 400;
 					return next(err);
 				} else {
-					return res.json(user)
+					const payload = {
+						userId: user._id,
+						email: user.email,
+						username: user.username
+					};
+
+					return res.json(payload)
 				}
 			}
 		});
 }
 
 function logout(req, res, next) {
-	if (req.session) {
-		// delete session object
-		const db = mongoose.connection;
-		req.session.destroy(function (err) {
-			if (err) {
-				return next(err);
-			} else {
-				return res.status(200).send("Logged Out!");
-			}
-		});
-	}
+	//Not needed anymore. Logout happens on client when token is destroyed
+	return 0;
 }
 
 module.exports = {

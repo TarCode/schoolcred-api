@@ -33,12 +33,10 @@ describe('User', () => {
 
 			agent
 					.post('/signup')
-					.withCredentials()
 					.send(userData)
 					.end((err, res) => {
 						res.should.have.status(200);
-						res.text.should.be.a('string');
-						res.text.should.equal('Signed up!');
+						res.body.should.have.property('token');
 						done();
 					})
 		})
@@ -52,35 +50,39 @@ describe('User', () => {
 
 			agent
 				.post('/signin')
-				.withCredentials()
 				.send(user)
 				.end((err, res) => {
-					console.log("ERROR:",err);
 					res.should.have.status(200);
-					res.text.should.be.a('string');
-					res.text.should.equal('Signed in!');
+					res.body.should.have.property('token');
 					done();
 				})
 		})
 
 		it('Should get user profile', done => {
-			agent
-				.get('/profile')
-				.end((err, res) => {
-					res.should.have.status(200);
-					done();
-				})
-		})
 
-		it('Should log a user out', done => {
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
 			agent
-				.get('/logout')
+				.post('/signin')
+				.send(user)
 				.end((err, res) => {
 					res.should.have.status(200);
-					res.text.should.be.a('string');
-					res.text.should.equal('Logged Out!');
-					done();
+					res.body.should.have.property('token');
+
+					agent
+						.get('/profile?userId=' + res.body.userId)
+						.set('x-access-token', res.body.token)
+						.end((err, res) => {
+							res.should.have.status(200);
+							done();
+						})
+
 				})
+
+			
 		})
 	})
 
