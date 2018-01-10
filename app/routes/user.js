@@ -6,13 +6,13 @@ const User = require('../models/user');
 
 function signup(req, res, next) {
 	if (req.body.password !== req.body.passwordConf) {
-		return res.json({ success: false, message: 'Authentication failed. Passwords must match.' });
+		return res.status(403).json({ success: false, message: 'Authentication failed. Passwords must match.' });
 	}
 
-	if (req.body.email &&
-		req.body.username &&
-		req.body.password &&
-		req.body.passwordConf) {
+	if (req.body.email && req.body.email.length > 0 &&
+		req.body.username && req.body.username.length > 0 &&
+		req.body.password && req.body.password.length > 0 &&
+		req.body.passwordConf && req.body.passwordConf.length > 0) {
 
 		var userData = {
 			email: req.body.email,
@@ -42,19 +42,16 @@ function signup(req, res, next) {
 			}
 		});
 	} else {
-		return res.json({ success: false, message: 'Authentication failed. All fields ust be completed' });
+		return res.status(403).json({ success: false, message: 'Authentication failed. All fields ust be completed' });
 	}
 }
 
 function signin(req, res, next) {
 	if (req.body.email && req.body.password) {
 		User.authenticate(req.body.email, req.body.password, function (err, user) {
-			if (err) throw err;
+			if (err) return res.status(403).json({ success: false, message: "User not found!" });
 
-			if (!user) {
-				return res.json({ success: false, message: 'Authentication failed. User not found.' });
-			} else if (user) {
-
+			if (user) {
 				const payload = {
 					userId: user._id
 				};
@@ -72,7 +69,7 @@ function signin(req, res, next) {
 			}
 		});
 	} else {
-		return res.json({ success: false, message: 'Authentication failed. All fields must be completed.' });
+		return res.status(403).json({ success: false, message: 'Authentication failed. All fields must be completed.' });
 	}
 }
 
@@ -81,12 +78,10 @@ function getProfile(req, res, next) {
 	User.findById(req.query.userId)
 		.exec(function (error, user) {
 			if (error) {
-				return next(error);
+				return res.status(401).json({ success: false, message: 'Not found!' });;
 			} else {
 				if (user === null) {
-					var err = new Error('Not authorized! Go back!');
-					err.status = 400;
-					return next(err);
+					return res.status(401).json({ success: false, message: 'Not authorized!' });
 				} else {
 					const payload = {
 						userId: user._id,
@@ -100,14 +95,8 @@ function getProfile(req, res, next) {
 		});
 }
 
-function logout(req, res, next) {
-	//Not needed anymore. Logout happens on client when token is destroyed
-	return 0;
-}
-
 module.exports = {
 	signup,
 	signin,
-	getProfile,
-	logout
+	getProfile
 }

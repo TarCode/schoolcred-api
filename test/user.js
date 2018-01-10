@@ -22,6 +22,90 @@ describe('User', () => {
 	})
 
 	describe('user', () => {
+
+		it('Should error on user signup with no fields', done => {
+
+			var userData = {
+				email: "",
+				username: "",
+				password: "",
+				passwordConf: "",
+			}
+
+			agent
+				.post('/signup')
+				.send(userData)
+				.end((err, res) => {
+					res.should.have.status(403);
+					done();
+				})
+		})
+
+		it('Should error on user signup with passwords not matching', done => {
+
+			var userData = {
+				email: "test",
+				username: "test",
+				password: "test",
+				passwordConf: "test2",
+			}
+
+			agent
+				.post('/signup')
+				.send(userData)
+				.end((err, res) => {
+					res.should.have.status(403);
+					done();
+				})
+		})
+
+		it('Should error when signing in with no fields', done => {
+
+			var user = {
+				email: "",
+				password: ""
+			}
+
+			agent
+				.post('/signin')
+				.send(user)
+				.end((err, res) => {
+					res.should.have.status(403);
+					done();
+				})
+		})
+
+		it('Should error when signing in with invalid credentials', done => {
+
+			var user = {
+				email: "test",
+				password: "abc"
+			}
+
+			agent
+				.post('/signin')
+				.send(user)
+				.end((err, res) => {
+					res.should.have.status(403);
+					done();
+				})
+		})
+
+		it('Should error when getting user profile without auth', done => {
+
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
+			agent
+				.get('/profile?userId=123')
+				.end((err, res) => {
+					res.should.have.status(403);
+					done();
+				})
+		})
+
 		it('Should signup a user', done => {
 
 			var userData = {

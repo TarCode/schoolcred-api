@@ -53,12 +53,6 @@ app.route('/signin')
 app.route('/signup')
 	.post(user.signup);
 
-app.route('/profile')
-	.get(user.getProfile);
-
-app.route('/logout')
-	.get(user.logout);
-
 
 app.use(function (req, res, next) {
 
@@ -90,6 +84,9 @@ app.use(function (req, res, next) {
 
 	}
 });
+
+app.route('/profile')
+	.get(user.getProfile);
 
 app.route('/item')
 	 .get(item.getItems)
