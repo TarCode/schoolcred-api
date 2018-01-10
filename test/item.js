@@ -38,191 +38,240 @@ describe('Items', () => {
 		
 	})
 
-	describe('/GET items', () => {
-		it('Should GET all the items', done => {
-			var user = {
-				email: "test",
-				password: "test"
-			}
+	it('Should throw error when getting items without auth', done => {
+		agent
+			.get('/item')
+			.end((err, res) => {
+				res.should.have.status(403);
+				done();
+			})
+	})
 
-			agent
-				.post('/signin')
-				.send(user)
-				.end((err, res) => {
-					res.should.have.status(200);
-					res.body.should.have.property('token');
+	it('Should throw error when adding an item without auth', done => {
+		var item = {
+			name: "test",
+			createdBy: "test"
+		}
 
-					agent
-						.get('/item')
-						.set('x-access-token', res.body.token)
-						.end((err, res) => {
-							res.should.have.status(200);
-							res.body.should.be.a('array');
-							res.body.length.should.be.eql(0);
-							done();
-						})
-				})
-		})
+		agent
+			.post('/item')
+			.send(item)
+			.end((err, res) => {
+				res.should.have.status(403);
+				done();
+			})
+	})
 
-		it('Should add an item', done => {
-			var user = {
-				email: "test",
-				password: "test"
-			}
+	it('Should throw error when getting an item by id without auth', done => {
 
-			agent
-				.post('/signin')
-				.send(user)
-				.end((err, res) => {
-					res.should.have.status(200);
-					res.body.should.have.property('token');
+		agent
+			.get('/item/123')
+			.end((err, res) => {
+				res.should.have.status(403);
+				done();
+			})
+	})
 
-					var item = {
-						name: "test",
-						createdBy: "test"
-					}
+	it('Should throw error when updating an item without auth', done => {
+		agent
+			.put('/item/123')
+			.end((err, res) => {
+				res.should.have.status(403);
+				done();
+			})
+	})
 
-					agent
-						.post('/item')
-						.set('x-access-token', res.body.token)
-						.send(item)
-						.end((err, res) => {
-							res.should.have.status(200);
-							done();
-						})
-				})
-		})
+	it('Should throw error when deleting an item without auth', done => {
+		agent
+			.delete('/item/123')
+			.end((err, res) => {
+				res.should.have.status(403);
+				done();
+			})
+	})
 
-		it('Should get an item by ID', done => {
-			var user = {
-				email: "test",
-				password: "test"
-			}
+	it('Should get all the items', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
 
-			agent
-				.post('/signin')
-				.send(user)
-				.end((err, signinRes) => {
-					signinRes.should.have.status(200);
-					signinRes.body.should.have.property('token');
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, res) => {
+				res.should.have.status(200);
+				res.body.should.have.property('token');
 
-					var item = {
-						name: "test",
-						createdBy: "test"
-					}
+				agent
+					.get('/item')
+					.set('x-access-token', res.body.token)
+					.end((err, res) => {
+						res.should.have.status(200);
+						res.body.should.be.a('array');
+						res.body.length.should.be.eql(0);
+						done();
+					})
+			})
+	})
 
-					agent
-						.post('/item')
-						.set('x-access-token', signinRes.body.token)
-						.send(item)
-						.end((err, res) => {
-							const itemId = JSON.parse(res.text).item._id;
-							res.should.have.status(200);
+	it('Should add an item', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
 
-							var itemToUpdate = {
-								name: "test3r"
-							}
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, res) => {
+				res.should.have.status(200);
+				res.body.should.have.property('token');
 
-							agent
-								.get('/item/' + itemId)
-								.set('x-access-token', signinRes.body.token)
-								.end((err, res) => {
-									res.should.have.status(200);
-									done();
-								})
+				var item = {
+					name: "test",
+					createdBy: "test"
+				}
 
-						})
+				agent
+					.post('/item')
+					.set('x-access-token', res.body.token)
+					.send(item)
+					.end((err, res) => {
+						res.should.have.status(200);
+						done();
+					})
+			})
+	})
 
-				})
-		})
+	it('Should get an item by ID', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
 
-		it('Should update an item', done => {
-			var user = {
-				email: "test",
-				password: "test"
-			}
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, signinRes) => {
+				signinRes.should.have.status(200);
+				signinRes.body.should.have.property('token');
 
-			agent
-				.post('/signin')
-				.send(user)
-				.end((err, signinRes) => {
-					signinRes.should.have.status(200);
-					signinRes.body.should.have.property('token');
+				var item = {
+					name: "test",
+					createdBy: "test"
+				}
 
-					var item = {
-						name: "test",
-						createdBy: "test"
-					}
+				agent
+					.post('/item')
+					.set('x-access-token', signinRes.body.token)
+					.send(item)
+					.end((err, res) => {
+						const itemId = JSON.parse(res.text).item._id;
+						res.should.have.status(200);
 
-					agent
-						.post('/item')
-						.set('x-access-token', signinRes.body.token)
-						.send(item)
-						.end((err, res) => {
-							const itemId = JSON.parse(res.text).item._id;
-							res.should.have.status(200);
+						var itemToUpdate = {
+							name: "test3r"
+						}
 
-							var itemToUpdate = {
-								name: "test3r"
-							}
+						agent
+							.get('/item/' + itemId)
+							.set('x-access-token', signinRes.body.token)
+							.end((err, res) => {
+								res.should.have.status(200);
+								done();
+							})
 
-							agent
-								.put('/item/' + itemId)
-								.set('x-access-token', signinRes.body.token)
-								.send(itemToUpdate)
-								.end((err, res) => {
-									res.should.have.status(200);
-									done();
-								})
+					})
 
-						})
+			})
+	})
 
-				})
-		})
+	it('Should update an item', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
 
-		it('Should delete an item', done => {
-			var user = {
-				email: "test",
-				password: "test"
-			}
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, signinRes) => {
+				signinRes.should.have.status(200);
+				signinRes.body.should.have.property('token');
 
-			agent
-				.post('/signin')
-				.send(user)
-				.end((err, signinRes) => {
-					signinRes.should.have.status(200);
-					signinRes.body.should.have.property('token');
+				var item = {
+					name: "test",
+					createdBy: "test"
+				}
 
-					var item = {
-						name: "test",
-						createdBy: "test"
-					}
+				agent
+					.post('/item')
+					.set('x-access-token', signinRes.body.token)
+					.send(item)
+					.end((err, res) => {
+						const itemId = JSON.parse(res.text).item._id;
+						res.should.have.status(200);
 
-					agent
-						.post('/item')
-						.set('x-access-token', signinRes.body.token)
-						.send(item)
-						.end((err, res) => {
-							const itemId = JSON.parse(res.text).item._id;
-							res.should.have.status(200);
+						var itemToUpdate = {
+							name: "test3r"
+						}
 
-							var itemToUpdate = {
-								name: "test3r"
-							}
+						agent
+							.put('/item/' + itemId)
+							.set('x-access-token', signinRes.body.token)
+							.send(itemToUpdate)
+							.end((err, res) => {
+								res.should.have.status(200);
+								done();
+							})
 
-							agent
-								.delete('/item/' + itemId)
-								.set('x-access-token', signinRes.body.token)
-								.end((err, res) => {
-									res.should.have.status(200);
-									done();
-								})
+					})
 
-						})
+			})
+	})
 
-				})
-		})
+	it('Should delete an item', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
 
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, signinRes) => {
+				signinRes.should.have.status(200);
+				signinRes.body.should.have.property('token');
+
+				var item = {
+					name: "test",
+					createdBy: "test"
+				}
+
+				agent
+					.post('/item')
+					.set('x-access-token', signinRes.body.token)
+					.send(item)
+					.end((err, res) => {
+						const itemId = JSON.parse(res.text).item._id;
+						res.should.have.status(200);
+
+						var itemToUpdate = {
+							name: "test3r"
+						}
+
+						agent
+							.delete('/item/' + itemId)
+							.set('x-access-token', signinRes.body.token)
+							.end((err, res) => {
+								res.should.have.status(200);
+								done();
+							})
+
+					})
+
+			})
 	})
 
 
