@@ -61,7 +61,6 @@ describe('Items', () => {
 							res.body.length.should.be.eql(0);
 							done();
 						})
-
 				})
 		})
 
@@ -90,6 +89,50 @@ describe('Items', () => {
 						.end((err, res) => {
 							res.should.have.status(200);
 							done();
+						})
+				})
+		})
+
+		it('Should update an item', done => {
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
+			agent
+				.post('/signin')
+				.send(user)
+				.end((err, signinRes) => {
+					signinRes.should.have.status(200);
+					signinRes.body.should.have.property('token');
+
+					var item = {
+						name: "test",
+						createdBy: "test"
+					}
+
+					agent
+						.post('/item')
+						.set('x-access-token', signinRes.body.token)
+						.send(item)
+						.end((err, res) => {
+							const itemId = JSON.parse(res.text).item._id;
+							res.should.have.status(200);
+
+							var itemToUpdate = {
+								name: "test3r"
+							}
+
+							agent
+								.put('/item/' + itemId)
+								.set('x-access-token', signinRes.body.token)
+								.send(itemToUpdate)
+								.end((err, res) => {
+									console.log("RESPONSE", res);
+									res.should.have.status(200);
+									done();
+								})
+
 						})
 
 				})

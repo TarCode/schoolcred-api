@@ -95,7 +95,7 @@ app.route('/item')
 	 .get(item.getItems)
 	 .post(item.postItem);
 
-app.route('/item:id')
+app.route('/item/:id')
 	 .get(item.getItem)
 	 .delete(item.deleteItem)
 	 .put(item.updateItem);
