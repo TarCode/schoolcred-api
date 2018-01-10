@@ -93,6 +93,49 @@ describe('Items', () => {
 				})
 		})
 
+		it('Should get an item by ID', done => {
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
+			agent
+				.post('/signin')
+				.send(user)
+				.end((err, signinRes) => {
+					signinRes.should.have.status(200);
+					signinRes.body.should.have.property('token');
+
+					var item = {
+						name: "test",
+						createdBy: "test"
+					}
+
+					agent
+						.post('/item')
+						.set('x-access-token', signinRes.body.token)
+						.send(item)
+						.end((err, res) => {
+							const itemId = JSON.parse(res.text).item._id;
+							res.should.have.status(200);
+
+							var itemToUpdate = {
+								name: "test3r"
+							}
+
+							agent
+								.get('/item/' + itemId)
+								.set('x-access-token', signinRes.body.token)
+								.end((err, res) => {
+									res.should.have.status(200);
+									done();
+								})
+
+						})
+
+				})
+		})
+
 		it('Should update an item', done => {
 			var user = {
 				email: "test",
@@ -128,7 +171,49 @@ describe('Items', () => {
 								.set('x-access-token', signinRes.body.token)
 								.send(itemToUpdate)
 								.end((err, res) => {
-									console.log("RESPONSE", res);
+									res.should.have.status(200);
+									done();
+								})
+
+						})
+
+				})
+		})
+
+		it('Should delete an item', done => {
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
+			agent
+				.post('/signin')
+				.send(user)
+				.end((err, signinRes) => {
+					signinRes.should.have.status(200);
+					signinRes.body.should.have.property('token');
+
+					var item = {
+						name: "test",
+						createdBy: "test"
+					}
+
+					agent
+						.post('/item')
+						.set('x-access-token', signinRes.body.token)
+						.send(item)
+						.end((err, res) => {
+							const itemId = JSON.parse(res.text).item._id;
+							res.should.have.status(200);
+
+							var itemToUpdate = {
+								name: "test3r"
+							}
+
+							agent
+								.delete('/item/' + itemId)
+								.set('x-access-token', signinRes.body.token)
+								.end((err, res) => {
 									res.should.have.status(200);
 									done();
 								})
