@@ -47,6 +47,16 @@ describe('Items', () => {
 			})
 	})
 
+	it('Should throw error when getting items with incorrect token', done => {
+		agent
+			.get('/item')
+			.set('x-access-token', "123123123123123")
+			.end((err, res) => {
+				res.should.have.status(403);
+				done();
+			})
+	})
+
 	it('Should throw error when adding an item without auth', done => {
 		var item = {
 			name: "test",

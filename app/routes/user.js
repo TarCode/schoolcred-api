@@ -81,7 +81,7 @@ function getProfile(req, res, next) {
 				return res.status(401).json({ success: false, message: 'Not found!' });;
 			} else {
 				if (user === null) {
-					return res.status(401).json({ success: false, message: 'Not authorized!' });
+					return res.status(401).json({ success: false, message: 'No user found!' });
 				} else {
 					const payload = {
 						userId: user._id,
