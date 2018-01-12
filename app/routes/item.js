@@ -6,7 +6,7 @@ function getItems(req, res) {
 
 	query.exec((err, items) => {
 		if (err) return res.send(err);
-		return res.json(items);
+		return res.json({success: true, items});
 	})
 }
 
@@ -15,7 +15,7 @@ function postItem(req, res) {
 
 	newItem.save((err, item) => {
 		if (err) return res.send(err);
-		return res.json({ message: "Item added!", item });
+		return res.json({ success: true, message: "Item added!", item });
 	})
 }
 
@@ -28,7 +28,7 @@ function getItem(req, res) {
 
 function deleteItem(req, res) {
 	Item.remove({ _id: req.params.id }, (err, result) => {
-		return res.json({ message: "Item deleted!", result })
+		return res.json({ success: true, message: "Item deleted!", result })
 	})
 }
 
@@ -37,7 +37,7 @@ function updateItem(req, res) {
 		if (err) return res.send(err);
 		Object.assign(item, req.body).save((err, item) => {
 			if (err) return res.send(err);
-			return res.json({ message: "Item updated!", item });
+			return res.json({ success: true, message: "Item updated!", item });
 		})
 	})
 }
