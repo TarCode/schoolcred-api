@@ -6,24 +6,26 @@ const User = require('../models/user');
 
 function signup(req, res, next) {
 	if (req.body.password !== req.body.passwordConf) {
-		return res.status(403).json({ success: false, message: 'Authentication failed. Passwords must match.' });
+		return res.status(403).json({ success: false, message: 'Signup failed. Passwords must match.' });
 	}
 
-	if (req.body.email && req.body.email.length > 0 &&
-		req.body.username && req.body.username.length > 0 &&
-		req.body.password && req.body.password.length > 0 &&
-		req.body.passwordConf && req.body.passwordConf.length > 0) {
+	const user = req.body
+
+	if (user.email && user.email.length > 0 &&
+		user.username && user.username.length > 0 &&
+		user.password && user.password.length > 0 &&
+		user.passwordConf && user.passwordConf.length > 0) {
 
 		var userData = {
-			email: req.body.email,
-			username: req.body.username,
-			password: req.body.password,
-			passwordConf: req.body.passwordConf,
+			email: user.email,
+			username: user.username,
+			password: user.password,
+			passwordConf: user.passwordConf,
 		}
 
 		User.create(userData, function (error, user) {
 			if (error) {
-				throw error;
+				res.status(403).json({ success: false, message: 'Signup failed. User already exists.' });
 			} else {
 				const payload = {
 					userId: user._id
@@ -42,13 +44,16 @@ function signup(req, res, next) {
 			}
 		});
 	} else {
-		return res.status(403).json({ success: false, message: 'Authentication failed. All fields ust be completed' });
+		return res.status(403).json({ success: false, message: 'Signup failed. All fields must be completed' });
 	}
 }
 
 function signin(req, res, next) {
-	if (req.body.email && req.body.password) {
-		User.authenticate(req.body.email, req.body.password, function (err, user) {
+
+	const user = req.body
+
+	if (user.email && user.password) {
+		User.authenticate(user.email, user.password, function (err, user) {
 			if (err) return res.status(403).json({ success: false, message: "User not found!" });
 
 			if (user) {
