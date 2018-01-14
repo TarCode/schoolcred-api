@@ -22,7 +22,7 @@ function postItem(req, res) {
 function getItem(req, res) {
 	Item.findById(req.params.id, (err, item) => {
 		if (err) return res.send(err);
-		return res.json(item);
+		return res.json({ success: true, item });
 	})
 }
 
