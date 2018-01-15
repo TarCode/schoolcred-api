@@ -125,6 +125,24 @@ describe('User', () => {
 					})
 		})
 
+		it('Should error when signing up an existing user', done => {
+
+			var userData = {
+				email: "test",
+				username: "test",
+				password: "test",
+				passwordConf: "test",
+			}
+
+			agent
+				.post('/signup')
+				.send(userData)
+				.end((err, res) => {
+					res.should.have.status(403);
+					done();
+				})
+		})
+
 		it('Should sign a user in', done => {
 
 			var user = {
