@@ -89,6 +89,10 @@ app.route('/deposit')
 	.get(deposit.getDeposits)
 	.post(deposit.postDeposit);
 
+app.route('/credit/:userId')
+	.get(credit.getCredit)
+
+
 app.listen(port, () => {
 	console.log("Listening on port ", port);
 })
