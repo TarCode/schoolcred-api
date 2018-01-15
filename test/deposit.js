@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const Deposit = require('../app/models/deposit');
+const Credit = require('../app/models/credit');
 const User = require('../app/models/user');
 
 const chai = require('chai');
@@ -18,26 +19,27 @@ var agent = chai.request.agent(server)
 
 describe('Deposit', () => {
 	before(done => {
-		User.remove({}, err => {
-			Deposit.remove({}, err => {
-				var userData = {
-					email: "test",
-					username: "test",
-					password: "test",
-					passwordConf: "test",
-				}
+		Credit.remove({}, err => {
+			User.remove({}, err => {
+				Deposit.remove({}, err => {
+					var userData = {
+						email: "test",
+						username: "test",
+						password: "test",
+						passwordConf: "test",
+					}
 
-				agent
-					.post('/signup')
-					.send(userData)
-					.end((err, res) => {
-						res.should.have.status(200);
-						res.body.should.have.property('token');
-						done();
-					})
+					agent
+						.post('/signup')
+						.send(userData)
+						.end((err, res) => {
+							res.should.have.status(200);
+							res.body.should.have.property('token');
+							done();
+						})
+				})
 			})
 		})
-		
 	})
 
 	it('Should throw error when getting deposits without auth', done => {
@@ -122,11 +124,12 @@ describe('Deposit', () => {
 
 
 	after(done => {
-		Deposit.remove({}, err => {
-			User.remove({}, err => {
-				done()
+		Credit.remove({}, err => {
+			Deposit.remove({}, err => {
+				User.remove({}, err => {
+					done()
+				})
 			})
 		})
 	})
-
 })
