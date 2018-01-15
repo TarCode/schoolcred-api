@@ -183,8 +183,31 @@ describe('User', () => {
 						})
 
 				})
+		})
 
-			
+		it('Should error when getting user profile with incorrect userId', done => {
+
+			var user = {
+				email: "test",
+				password: "test"
+			}
+
+			agent
+				.post('/signin')
+				.send(user)
+				.end((err, res) => {
+					res.should.have.status(200);
+					res.body.should.have.property('token');
+
+					agent
+						.get('/profile?userId=123')
+						.set('x-access-token', res.body.token)
+						.end((err, res) => {
+							res.should.have.status(401);
+							done();
+						})
+
+				})
 		})
 	})
 
