@@ -44,7 +44,7 @@ describe('Deposit', () => {
 
 	it('Should throw error when getting deposits without auth', done => {
 		agent
-			.get('/deposit')
+			.get('/deposit/123')
 			.end((err, res) => {
 				res.should.have.status(403);
 				done();
@@ -54,12 +54,11 @@ describe('Deposit', () => {
 
 	it('Should throw error when adding a deposit without auth', done => {
 		var depositData = {
-			userId: "123",
 			amount: 100
 		}
 
 		agent
-			.post('/deposit')
+			.post('/deposit/123')
 			.send(depositData)
 			.end((err, res) => {
 				res.should.have.status(403);
@@ -81,7 +80,7 @@ describe('Deposit', () => {
 				res.body.should.have.property('token');
 
 				agent
-					.get('/deposit')
+					.get('/deposit/' + res.body.userId)
 					.set('x-access-token', res.body.token)
 					.end((err, res) => {
 						res.should.have.status(200);
@@ -92,7 +91,7 @@ describe('Deposit', () => {
 			})
 	})
 
-	it('Should add a deposit', done => {
+	it('Should add a deposit if credit account does not exist', done => {
 		var user = {
 			email: "test",
 			password: "test"
@@ -106,16 +105,45 @@ describe('Deposit', () => {
 				res.body.should.have.property('token');
 
 				var depositData = {
-					amount: 123,
-					userId: res.body.userId
+					amount: 123
 				}
 
 				agent
-					.post('/deposit')
+					.post('/deposit/' + res.body.userId)
 					.set('x-access-token', res.body.token)
 					.send(depositData)
 					.end((err, res) => {
 						res.should.have.status(200);
+						res.body.credit.total.should.equal(123)
+						done();
+					})
+			})
+	})
+
+	it('Should add a deposit if credit account exists', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
+
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, res) => {
+				res.should.have.status(200);
+				res.body.should.have.property('token');
+
+				var depositData = {
+					amount: 234
+				}
+
+				agent
+					.post('/deposit/' + res.body.userId)
+					.set('x-access-token', res.body.token)
+					.send(depositData)
+					.end((err, res) => {
+						res.should.have.status(200);
+						res.body.credit.total.should.equal(357)
 						done();
 					})
 			})

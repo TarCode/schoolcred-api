@@ -85,7 +85,7 @@ app.route('/item/:id')
 	 .delete(item.deleteItem)
 	 .put(item.updateItem);
 
-app.route('/deposit')
+app.route('/deposit/:userId')
 	.get(deposit.getDeposits)
 	.post(deposit.postDeposit);
 

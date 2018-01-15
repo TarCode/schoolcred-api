@@ -3,7 +3,7 @@ const Deposit = require('../models/deposit');
 const Credit = require('../models/credit');
 
 function getDeposits(req, res) {
-	let query = Deposit.find({});
+	let query = Deposit.find({ userId: req.params.userId });
 
 	query.exec((err, deposits) => {
 		if (err) return res.send(err);
@@ -12,19 +12,22 @@ function getDeposits(req, res) {
 }
 
 function postDeposit(req, res) {
-	let newDeposit = new Deposit(req.body);
+	let newDeposit = new Deposit({
+		amount: req.body.amount,
+		userId: req.params.userId
+	});
 
 	newDeposit.save((err, deposit) => {
 		if (err) return res.send(err);
 
-		let creditQuery = Credit.findOne({ userId: req.body.userId });
+		let creditQuery = Credit.findOne({ userId: req.params.userId });
 
 		creditQuery.exec((err, credit) => {
 			if (err) return res.send(err);
 
 			if (!credit) {
 				let newCredit = new Credit({
-					userId: req.body.userId,
+					userId: req.params.userId,
 					total: 0
 				});
 
@@ -36,7 +39,7 @@ function postDeposit(req, res) {
 						if (err) return res.send(err);
 						return res.json({ success: true, message: "Credit updated!", credit: updatedCredit });
 					})
-					
+
 				})
 			} else {
 

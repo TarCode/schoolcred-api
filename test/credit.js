@@ -51,8 +51,31 @@ describe('Credit', () => {
 			})
 	})
 
+	it('Should get initial credit balance', done => {
+		var user = {
+			email: "test",
+			password: "test"
+		}
 
-	it('Should get credit balance', done => {
+		agent
+			.post('/signin')
+			.send(user)
+			.end((err, userRes) => {
+				userRes.should.have.status(200);
+				userRes.body.should.have.property('token');
+
+				agent
+					.get('/credit/' + userRes.body.userId)
+					.set('x-access-token', userRes.body.token)
+					.end((err, res) => {
+						res.should.have.status(200);
+						done();
+					})
+			})
+	})
+
+
+	it('Should get credit balance after making deposit', done => {
 		var user = {
 			email: "test",
 			password: "test"
@@ -66,12 +89,11 @@ describe('Credit', () => {
 				userRes.body.should.have.property('token');
 
 				var depositData = {
-					amount: 123,
-					userId: userRes.body.userId
+					amount: 123
 				}
 
 				agent
-					.post('/deposit')
+					.post('/deposit/' + userRes.body.userId)
 					.set('x-access-token', userRes.body.token)
 					.send(depositData)
 					.end((err, res) => {
