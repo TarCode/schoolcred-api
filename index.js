@@ -4,13 +4,15 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const config = require('config');
 const cors = require('cors');
 
 const port = 8080;
 
 const item = require('./app/routes/item');
 const user = require('./app/routes/user');
-let config = require('config');
+const credit = require('./app/routes/credit');
+const deposit = require('./app/routes/deposit');
 
 let options = {
 	useMongoClient: true
@@ -48,16 +50,13 @@ app.route('/signup')
 	.post(user.signup);
 
 
-app.use(function (req, res, next) {
-
+app.use((req, res, next) => {
 	// check header or url parameters or post parameters for token
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
-
 	// decode token
 	if (token) {
-
 		// verifies secret and checks exp
-		jwt.verify(token, config.secret, function (err, decoded) {
+		jwt.verify(token, config.secret, (err, decoded) => {
 			if (err) {
 				return res.status(403).json({ success: false, message: 'Failed to authenticate token.' });
 			} else {
@@ -66,16 +65,11 @@ app.use(function (req, res, next) {
 				next();
 			}
 		});
-
 	} else {
-
-		// if there is no token
-		// return an error
 		return res.status(403).send({
 			success: false,
 			message: 'No token provided.'
 		});
-
 	}
 });
 
@@ -90,6 +84,10 @@ app.route('/item/:id')
 	 .get(item.getItem)
 	 .delete(item.deleteItem)
 	 .put(item.updateItem);
+
+app.route('/deposit')
+	.get(deposit.getDeposits)
+	.post(deposit.postDeposit);
 
 app.listen(port, () => {
 	console.log("Listening on port ", port);
